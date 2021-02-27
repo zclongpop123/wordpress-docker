@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+    mysql:
+        container_name: MySQL
+
+        image: mysql:latest
+        restart: unless-stopped
+
+        networks:
+            extnetwork:
+                ipv4_address: 172.20.1.1
+
+        volumes:
+            - /home/mysql:/var/lib/mysql
+
+        environment:
+            MYSQL_ROOT_PASSWORD: somewordpress
+            MYSQL_DATABASE: wordpress
+            MYSQL_USER: wordpress
+            MYSQL_PASSWORD: wordpress
+
+        ports:
+            - '3306:3306'
+
+
+    wordpress:
+        container_name: WordPress
+
+        image: wordpress:latest
+        restart: unless-stopped
+
+        networks:
+            extnetwork:
+                ipv4_address: 172.20.1.2
+
+        environment:
+            WORDPRESS_DB_HOST: 172.20.1.1:3306
+            WORDPRESS_DB_USER: wordpress
+            WORDPRESS_DB_PASSWORD: wordpress
+            WORDPRESS_DB_NAME: wordpress
+
+        volumes:
+            - /home/wordpress:/var/www/html/wp-content
+
+        ports:
+            - '8080:80'
+
+
+networks:
+    extnetwork:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.20.0.0/16
