@@ -1,55 +1,37 @@
 version: '3'
 
 services:
-    mysql:
-        container_name: MySQL
+    mariadb:
+        container_name: Mariadb
 
-        image: mysql:latest
+        image: mariadb
         restart: unless-stopped
 
-        networks:
-            extnetwork:
-                ipv4_address: 172.20.1.1
-
         volumes:
-            - /home/mysql:/var/lib/mysql
+            - /home/mariadb:/var/lib/mysql
 
         environment:
-            MYSQL_ROOT_PASSWORD: somewordpress
-            MYSQL_DATABASE: wordpress
-            MYSQL_USER: wordpress
-            MYSQL_PASSWORD: wordpress
+            MARIADB_ROOT_PASSWORD: example
 
-        ports:
-            - '3306:3306'
 
 
     wordpress:
         container_name: WordPress
 
-        image: wordpress:latest
+        image: wordpress:apache
         restart: unless-stopped
 
-        networks:
-            extnetwork:
-                ipv4_address: 172.20.1.2
+        depends_on:
+            - mariadb
 
         environment:
-            WORDPRESS_DB_HOST: 172.20.1.1:3306
-            WORDPRESS_DB_USER: wordpress
-            WORDPRESS_DB_PASSWORD: wordpress
-            WORDPRESS_DB_NAME: wordpress
+            WORDPRESS_DB_HOST: mariadb:3306
+            WORDPRESS_DB_USER: wordpress_db_user
+            WORDPRESS_DB_PASSWORD: zcl.123
+            WORDPRESS_DB_NAME: wordpress_db
 
         volumes:
             - /home/wordpress:/var/www/html/wp-content
 
         ports:
             - '8080:80'
-
-
-networks:
-    extnetwork:
-        driver: bridge
-        ipam:
-            config:
-                - subnet: 172.20.0.0/16
